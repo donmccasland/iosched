@@ -33,17 +33,13 @@ steps:
 #
 # Build the project
 #
-#  - 'JAVA_TOOL_OPTIONS="-Xmx12g"'
-#  - 'GRADLE_USER_HOME=/build_cache/.gradle'
-#  - 'GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=8 -Dkotlin.incremental=false"'
 - name: 'gcr.io/$PROJECT_ID/android:29'
   id: build
-  args: ["./gradlew", "build"]
+  args: ["./gradlew", "clean", "assemble"]
   env:
   - 'TERM=dumb'
   - 'GRADLE_USER_HOME=/build_cache/.gradle'
-  - 'GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx12g -Dorg.gradle.parallel=true -Dorg.gradle.daemon=false -Dorg.gradle.logging.level=debug"'
-  - 'BRANCH_NAME=$BRANCH_NAME'
+  - 'BRANCH_NAME=${_BRANCH_NAME}'
   waitFor: ['extract_build_cache']
   volumes:
   - name: 'build_cache'
@@ -63,7 +59,7 @@ steps:
 # Compress the gradle build cache
 - name: 'gcr.io/$PROJECT_ID/tar'
   id: compress_cache
-  args: ['cpvzf', '/build_cache/cache.tgz', '-C', '/build_cache', '/build_cache/.gradle']
+  args: ['cpvzf', '/build_cache/cache.tgz', '-C', '/build_cache/.gradle/caches', '/build_cache/.gradle/wrapper']
   waitFor: ['build']
   volumes:
   - name: 'build_cache'
